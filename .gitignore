@@ -1,3 +1,7 @@
 /modelsim/work
 /modelsim/openmips.cr.mti
 /modelsim/openmips.mpf
+/.vscode/
+/modelsim/inst_rom.data
+/modelsim/transcript
+/modelsim/vsim.wlf
