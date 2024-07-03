@@ -17,7 +17,8 @@ module if_id(
 	always @ (posedge clk) begin
 		if (rst == `RstEnable) begin
 			id_pc <= `ZeroWord;
-			id_inst <= `ZeroWord;
+			// id_inst <= `ZeroWord;
+			id_inst <= ~(`ZeroWord);//better for debug
 		end 
 		else begin
 			id_pc <= if_pc;
