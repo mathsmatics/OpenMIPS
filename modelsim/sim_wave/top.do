@@ -25,7 +25,7 @@ add wave -noupdate -expand -group id -radix binary /openmips_min_sopc_tb/openmip
 add wave -noupdate -expand -group id -radix binary /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/id0/alusel_o
 add wave -noupdate -expand -group id -radix binary /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/id0/op
 add wave -noupdate -expand -group id -color Violet /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/id0/imm
-add wave -noupdate -expand -group id -color Cyan /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/id0/instvalid
+add wave -noupdate -expand -group id -color Yellow /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/id0/instvalid
 add wave -noupdate -expand -group id -color Violet /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/id0/reg1_o
 add wave -noupdate -expand -group id -color Violet /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/id0/reg2_o
 add wave -noupdate -expand -group id -color Cyan /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/id0/wreg_o
@@ -39,15 +39,27 @@ add wave -noupdate -group id_ex -radix unsigned /openmips_min_sopc_tb/openmips_m
 add wave -noupdate -expand -group ex -color Cyan /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex0/wreg_o
 add wave -noupdate -expand -group ex -radix unsigned /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex0/wd_o
 add wave -noupdate -expand -group ex -color Plum /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex0/wdata_o
+add wave -noupdate -expand -group ex -color Cyan /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex0/whilo_o
+add wave -noupdate -expand -group ex -color {Pale Green} /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex0/hi_o
+add wave -noupdate -expand -group ex -color {Pale Green} /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex0/lo_o
 add wave -noupdate -group ex_mem -color Cyan /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex_mem0/mem_wreg
 add wave -noupdate -group ex_mem -radix unsigned /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex_mem0/mem_wd
 add wave -noupdate -group ex_mem -color Plum /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex_mem0/mem_wdata
 add wave -noupdate -expand -group mem -color Cyan /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/mem0/wreg_o
 add wave -noupdate -expand -group mem -radix unsigned /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/mem0/wd_o
 add wave -noupdate -expand -group mem -color Plum /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/mem0/wdata_o
+add wave -noupdate -expand -group mem -color Cyan /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/mem0/whilo_o
+add wave -noupdate -expand -group mem -color {Pale Green} /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/mem0/hi_o
+add wave -noupdate -expand -group mem -color {Pale Green} /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/mem0/lo_o
 add wave -noupdate -expand -group mem_wb -color Cyan /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/mem_wb0/wb_wreg
 add wave -noupdate -expand -group mem_wb -radix unsigned /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/mem_wb0/wb_wd
 add wave -noupdate -expand -group mem_wb -color Plum /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/mem_wb0/wb_wdata
+add wave -noupdate -expand -group mem_wb -color Cyan /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/mem_wb0/wb_whilo
+add wave -noupdate -expand -group mem_wb -color {Pale Green} /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/mem_wb0/wb_hi
+add wave -noupdate -expand -group mem_wb -color {Pale Green} /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/mem_wb0/wb_lo
+add wave -noupdate -expand -group hilo_reg -color Yellow /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/hilo_reg0/clk
+add wave -noupdate -expand -group hilo_reg -color {Pale Green} /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/hilo_reg0/hi_o
+add wave -noupdate -expand -group hilo_reg -color {Pale Green} /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/hilo_reg0/lo_o
 add wave -noupdate -expand -group regs /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/regfile1/regs
 add wave -noupdate -expand -group regs {/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/regfile1/regs[0]}
 add wave -noupdate -expand -group regs {/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/regfile1/regs[1]}
@@ -59,8 +71,10 @@ add wave -noupdate -expand -group regs {/openmips_min_sopc_tb/openmips_min_sopc0
 add wave -noupdate -expand -group regs {/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/regfile1/regs[7]}
 add wave -noupdate -expand -group regs {/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/regfile1/regs[8]}
 add wave -noupdate -expand -group regs {/openmips_min_sopc_tb/openmips_min_sopc0/openmips0/regfile1/regs[9]}
+add wave -noupdate -expand -group regs /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/hilo_reg0/hi_o
+add wave -noupdate -expand -group regs /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/hilo_reg0/lo_o
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {166400 ps} 0}
+WaveRestoreCursors {{Cursor 1} {290117 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 125
 configure wave -valuecolwidth 100
@@ -76,4 +90,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {91940 ps} {500821 ps}
+WaveRestoreZoom {164951 ps} {606530 ps}

@@ -129,6 +129,60 @@ module id(
 						reg2_read_o <= 1'b1;
 						instvalid <= `InstValid;
 					end
+					`EXE_MFHI: begin //mfhi 指令
+						aluop_o <= `EXE_MFHI_OP;
+						alusel_o <= `EXE_RES_MOVE;
+						wreg_o <= `WriteEnable;
+						reg1_read_o <= 1'b0;
+						reg2_read_o <= 1'b0;
+						instvalid <= `InstValid;
+					end
+					`EXE_MFLO: begin //mflo 指令
+						aluop_o <= `EXE_MFLO_OP;
+						alusel_o <= `EXE_RES_MOVE;
+						wreg_o <= `WriteEnable;
+						reg1_read_o <= 1'b0;
+						reg2_read_o <= 1'b0;
+						instvalid <= `InstValid;
+					end
+					`EXE_MTHI: begin //mthi 指令
+						aluop_o <= `EXE_MTHI_OP;
+						wreg_o <= `WriteDisable;
+						reg1_read_o <= 1'b1;
+						reg2_read_o <= 1'b0;
+						instvalid <= `InstValid;
+					end
+					`EXE_MTLO: begin //mtlo 指令
+						aluop_o <= `EXE_MTLO_OP;
+						wreg_o <= `WriteDisable;
+						reg1_read_o <= 1'b1;
+						reg2_read_o <= 1'b0;
+						instvalid <= `InstValid;
+					end
+					`EXE_MOVN: begin //movn 指令
+						aluop_o <= `EXE_MOVN_OP;
+						alusel_o <= `EXE_RES_MOVE;
+						reg1_read_o <= 1'b1;
+						reg2_read_o <= 1'b1;
+						instvalid <= `InstValid;
+						if(reg2_o != `ZeroWord) begin
+							wreg_o <= `WriteEnable;
+						end else begin
+							wreg_o <= `WriteDisable;
+						end
+					end
+					`EXE_MOVZ: begin //movz 指令
+						aluop_o <= `EXE_MOVZ_OP;
+						alusel_o <= `EXE_RES_MOVE;
+						reg1_read_o <= 1'b1;
+						reg2_read_o <= 1'b1;
+						instvalid <= `InstValid;
+						if(reg2_o == `ZeroWord) begin
+							wreg_o <= `WriteEnable;
+						end else begin
+							wreg_o <= `WriteDisable;
+						end
+					end
 					`EXE_SYNC: begin //sync 指令 ?
 						aluop_o <= `EXE_NOP_OP;
 						alusel_o <= `EXE_RES_NOP;
