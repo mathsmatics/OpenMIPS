@@ -37,9 +37,9 @@ module id(
 	output reg						wreg_o
 );
 
-	wire[5:0] op = inst_i[31:26];// 指令码
+	wire[5:0] op = inst_i[31:26];// op
 	wire[4:0] op2 = inst_i[10:6];// sa
-	wire[5:0] op3 = inst_i[5:0];// 功能码
+	wire[5:0] op3 = inst_i[5:0];// func
 	wire[4:0] op4 = inst_i[20:16];// rt
 	reg[`RegBus] imm;
 	reg instvalid;
@@ -68,11 +68,11 @@ module id(
 			imm <= `ZeroWord;
 			instvalid <= `InstInvalid;
 			
-			case (op)
+			case (op)// op
 			`EXE_SPECIAL_INST: begin
-				case (op2)
+				case (op2)// sa
 				5'b00000: begin
-					case (op3)
+					case (op3)// func
 					`EXE_OR: begin //or 指令
 						aluop_o <= `EXE_OR_OP;
 						alusel_o <= `EXE_RES_LOGIC;
@@ -183,6 +183,68 @@ module id(
 							wreg_o <= `WriteDisable;
 						end
 					end
+					`EXE_SLT: begin
+						aluop_o <= `EXE_SLT_OP;
+						alusel_o <= `EXE_RES_ARITHMETIC;
+						wreg_o <= `WriteEnable;
+						reg1_read_o <= 1'b1;
+						reg2_read_o <= 1'b1;
+						instvalid <= `InstValid;
+					end
+					`EXE_SLTU: begin
+						aluop_o <= `EXE_SLTU_OP;
+						alusel_o <= `EXE_RES_ARITHMETIC;
+						wreg_o <= `WriteEnable;
+						reg1_read_o <= 1'b1;
+						reg2_read_o <= 1'b1;
+						instvalid <= `InstValid;
+					end
+					`EXE_ADD: begin
+						aluop_o <= `EXE_ADD_OP;
+						alusel_o <= `EXE_RES_ARITHMETIC;
+						wreg_o <= `WriteEnable;
+						reg1_read_o <= 1'b1;
+						reg2_read_o <= 1'b1;
+						instvalid <= `InstValid;
+					end
+					`EXE_ADDU: begin
+						aluop_o <= `EXE_ADDU_OP;
+						alusel_o <= `EXE_RES_ARITHMETIC;
+						wreg_o <= `WriteEnable;
+						reg1_read_o <= 1'b1;
+						reg2_read_o <= 1'b1;
+						instvalid <= `InstValid;
+					end
+					`EXE_SUB: begin
+						aluop_o <= `EXE_SUB_OP;
+						alusel_o <= `EXE_RES_ARITHMETIC;
+						wreg_o <= `WriteEnable;
+						reg1_read_o <= 1'b1;
+						reg2_read_o <= 1'b1;
+						instvalid <= `InstValid;
+					end
+					`EXE_SUBU: begin
+						aluop_o <= `EXE_SUBU_OP;
+						alusel_o <= `EXE_RES_ARITHMETIC;
+						wreg_o <= `WriteEnable;
+						reg1_read_o <= 1'b1;
+						reg2_read_o <= 1'b1;
+						instvalid <= `InstValid;
+					end
+					`EXE_MULT: begin
+						aluop_o <= `EXE_MULT_OP;
+						wreg_o <= `WriteDisable;
+						reg1_read_o <= 1'b1;
+						reg2_read_o <= 1'b1;
+						instvalid <= `InstValid;
+					end
+					`EXE_MULTU: begin
+						aluop_o <= `EXE_MULTU_OP;
+						wreg_o <= `WriteDisable;
+						reg1_read_o <= 1'b1;
+						reg2_read_o <= 1'b1;
+						instvalid <= `InstValid;
+					end
 					`EXE_SYNC: begin //sync 指令 ?
 						aluop_o <= `EXE_NOP_OP;
 						alusel_o <= `EXE_RES_NOP;
@@ -240,6 +302,78 @@ module id(
 				imm <= {inst_i[15:0], 16'h0};
 				instvalid <= `InstValid;
 			end
+			`EXE_SLTI: begin
+				aluop_o <= `EXE_SLT_OP;
+				alusel_o <= `EXE_RES_ARITHMETIC;
+				wd_o <= inst_i[20:16];// rt
+				wreg_o <= `WriteEnable;
+				reg1_read_o <= 1'b1;
+				reg2_read_o <= 1'b0;
+				imm <= {{16{inst_i[15]}}, inst_i[15:0]};
+				instvalid <= `InstValid;
+			end
+			`EXE_SLTIU: begin
+				aluop_o <= `EXE_SLTU_OP;
+				alusel_o <= `EXE_RES_ARITHMETIC;
+				wd_o <= inst_i[20:16];// rt
+				wreg_o <= `WriteEnable;
+				reg1_read_o <= 1'b1;
+				reg2_read_o <= 1'b0;
+				imm <= {{16{inst_i[15]}}, inst_i[15:0]};
+				instvalid <= `InstValid;
+			end
+			`EXE_ADDI: begin
+				aluop_o <= `EXE_ADDI_OP;
+				alusel_o <= `EXE_RES_ARITHMETIC;
+				wd_o <= inst_i[20:16];// rt
+				wreg_o <= `WriteEnable;
+				reg1_read_o <= 1'b1;
+				reg2_read_o <= 1'b0;
+				imm <= {{16{inst_i[15]}}, inst_i[15:0]};
+				instvalid <= `InstValid;
+			end
+			`EXE_ADDIU: begin
+				aluop_o <= `EXE_ADDIU_OP;
+				alusel_o <= `EXE_RES_ARITHMETIC;
+				wd_o <= inst_i[20:16];// rt
+				wreg_o <= `WriteEnable;
+				reg1_read_o <= 1'b1;
+				reg2_read_o <= 1'b0;
+				imm <= {{16{inst_i[15]}}, inst_i[15:0]};
+				instvalid <= `InstValid;
+			end
+
+			`EXE_SPECIAL2_INST: begin
+				case (op3)// func
+				`EXE_CLZ: begin
+					aluop_o <= `EXE_CLZ_OP;
+					alusel_o <= `EXE_RES_ARITHMETIC;
+					wreg_o <= `WriteEnable;
+					reg1_read_o <= 1'b1;
+					reg2_read_o <= 1'b0;
+					instvalid <= `InstValid;
+				end
+				`EXE_CLO: begin
+					aluop_o <= `EXE_CLO_OP;
+					alusel_o <= `EXE_RES_ARITHMETIC;
+					wreg_o <= `WriteEnable;
+					reg1_read_o <= 1'b1;
+					reg2_read_o <= 1'b0;
+					instvalid <= `InstValid;
+				end
+				`EXE_MUL: begin
+					aluop_o <= `EXE_MUL_OP;
+					alusel_o <= `EXE_RES_MUL;
+					wreg_o <= `WriteEnable;
+					reg1_read_o <= 1'b1;
+					reg2_read_o <= 1'b1;
+					instvalid <= `InstValid;
+				end
+				default: begin
+				end
+				endcase //EXE_SPECIAL_INST2 case
+			end
+
 			`EXE_PREF: begin //pref 指令 ?
 				aluop_o <= `EXE_NOP_OP;
 				alusel_o <= `EXE_RES_NOP;

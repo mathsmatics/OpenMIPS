@@ -42,6 +42,7 @@ add wave -noupdate -expand -group ex -color Plum /openmips_min_sopc_tb/openmips_
 add wave -noupdate -expand -group ex -color Cyan /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex0/whilo_o
 add wave -noupdate -expand -group ex -color {Pale Green} /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex0/hi_o
 add wave -noupdate -expand -group ex -color {Pale Green} /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex0/lo_o
+add wave -noupdate -expand -group ex -color Yellow /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex0/ov_sum
 add wave -noupdate -group ex_mem -color Cyan /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex_mem0/mem_wreg
 add wave -noupdate -group ex_mem -radix unsigned /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex_mem0/mem_wd
 add wave -noupdate -group ex_mem -color Plum /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/ex_mem0/mem_wdata
@@ -74,7 +75,7 @@ add wave -noupdate -expand -group regs {/openmips_min_sopc_tb/openmips_min_sopc0
 add wave -noupdate -expand -group regs /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/hilo_reg0/hi_o
 add wave -noupdate -expand -group regs /openmips_min_sopc_tb/openmips_min_sopc0/openmips0/hilo_reg0/lo_o
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {290117 ps} 0}
+WaveRestoreCursors {{Cursor 1} {1080000 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 125
 configure wave -valuecolwidth 100
@@ -90,4 +91,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {164951 ps} {606530 ps}
+WaveRestoreZoom {0 ps} {1170750 ps}
