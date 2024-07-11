@@ -369,6 +369,38 @@ module id(
 					reg2_read_o <= 1'b1;
 					instvalid <= `InstValid;
 				end
+				`EXE_MADD: begin
+					aluop_o <= `EXE_MADD_OP;
+					alusel_o <= `EXE_RES_MUL;
+					wreg_o <= `WriteDisable;
+					reg1_read_o <= 1'b1;
+					reg2_read_o <= 1'b1;	  			
+					instvalid <= `InstValid;	
+				end
+				`EXE_MADDU: begin
+					aluop_o <= `EXE_MADDU_OP;
+					alusel_o <= `EXE_RES_MUL;
+					wreg_o <= `WriteDisable;
+					reg1_read_o <= 1'b1;
+					reg2_read_o <= 1'b1;	  			
+					instvalid <= `InstValid;	
+				end
+				`EXE_MSUB: begin
+					aluop_o <= `EXE_MSUB_OP;
+					alusel_o <= `EXE_RES_MUL;
+					wreg_o <= `WriteDisable;
+					reg1_read_o <= 1'b1;
+					reg2_read_o <= 1'b1;	  			
+					instvalid <= `InstValid;	
+				end
+				`EXE_MSUBU: begin
+					aluop_o <= `EXE_MSUBU_OP;
+					alusel_o <= `EXE_RES_MUL;
+					wreg_o <= `WriteDisable;
+					reg1_read_o <= 1'b1;
+					reg2_read_o <= 1'b1;	  			
+					instvalid <= `InstValid;	
+				end			
 				default: begin
 				end
 				endcase //EXE_SPECIAL_INST2 case
