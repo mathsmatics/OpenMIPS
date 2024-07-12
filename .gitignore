@@ -6,3 +6,4 @@
 /modelsim/transcript
 /modelsim/vsim.wlf
 /modelsim/wlf*
+/modelsim/*.vstf

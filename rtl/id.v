@@ -245,6 +245,20 @@ module id(
 						reg2_read_o <= 1'b1;
 						instvalid <= `InstValid;
 					end
+					`EXE_DIV: begin
+						aluop_o <= `EXE_DIV_OP;
+						wreg_o <= `WriteDisable;
+						reg1_read_o <= 1'b1;
+						reg2_read_o <= 1'b1;
+						instvalid <= `InstValid;
+					end
+					`EXE_DIVU: begin
+						aluop_o <= `EXE_DIVU_OP;
+						wreg_o <= `WriteDisable;
+						reg1_read_o <= 1'b1;
+						reg2_read_o <= 1'b1;
+						instvalid <= `InstValid;
+					end		
 					`EXE_SYNC: begin //sync 指令 ?
 						aluop_o <= `EXE_NOP_OP;
 						alusel_o <= `EXE_RES_NOP;
