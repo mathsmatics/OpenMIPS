@@ -22,6 +22,9 @@ module id(
 	input wire[`RegBus]				mem_wdata_i,
 	input wire[`RegAddrBus]			mem_wd_i,
 
+	//如果上一条指令是转移指令，那么下一条指令在译码的时候is_in_delayslot为true
+	input wire						is_in_delayslot_i,
+
 	//送到regfile的信息
 	output reg						reg1_read_o,
 	output reg						reg2_read_o,
@@ -34,7 +37,17 @@ module id(
 	output reg[`RegBus]				reg1_o,
 	output reg[`RegBus]				reg2_o,
 	output reg[`RegAddrBus]			wd_o,
-	output reg						wreg_o
+	output reg						wreg_o,
+
+	//延迟槽
+	output reg						next_inst_in_delayslot_o,
+	output reg						branch_flag_o,
+	output reg[`RegBus]				branch_target_address_o,
+	output reg[`RegBus]				link_addr_o,
+
+	output reg						is_in_delayslot_o,
+	
+	output wire						stallreq
 );
 
 	wire[5:0] op = inst_i[31:26];// op
@@ -43,6 +56,14 @@ module id(
 	wire[4:0] op4 = inst_i[20:16];// rt
 	reg[`RegBus] imm;
 	reg instvalid;
+	wire[`RegBus] pc_plus_8;
+	wire[`RegBus] pc_plus_4;
+	wire[`RegBus] imm_sll2_signedext; 
+
+	assign pc_plus_8 = pc_i + 8;
+	assign pc_plus_4 = pc_i + 4;
+	assign imm_sll2_signedext = {{14{inst_i[15]}}, inst_i[15:0], 2'b00 };  
+	assign stallreq = `NoStop;
 
 	always @ (*) begin
 		if (rst == `RstEnable) begin
@@ -56,6 +77,10 @@ module id(
 			reg2_addr_o <= `NOPRegAddr;
 			imm <= 32'h0;
 			instvalid <= `InstInvalid;
+			link_addr_o <= `ZeroWord;
+			branch_flag_o <= `NotBranch;
+			branch_target_address_o <= `ZeroWord;
+			next_inst_in_delayslot_o <= `NotInDelaySlot;
 	  	end else begin
 			aluop_o <= `EXE_NOP_OP;
 			alusel_o <= `EXE_RES_NOP;
@@ -67,6 +92,10 @@ module id(
 			reg2_addr_o <= inst_i[20:16];// rt
 			imm <= `ZeroWord;
 			instvalid <= `InstInvalid;
+			link_addr_o <= `ZeroWord;
+			branch_flag_o <= `NotBranch;
+			branch_target_address_o <= `ZeroWord;
+			next_inst_in_delayslot_o <= `NotInDelaySlot;
 			
 			case (op)// op
 			`EXE_SPECIAL_INST: begin
@@ -258,7 +287,32 @@ module id(
 						reg1_read_o <= 1'b1;
 						reg2_read_o <= 1'b1;
 						instvalid <= `InstValid;
-					end		
+					end
+					`EXE_JR: begin
+						aluop_o <= `EXE_JR_OP;
+						alusel_o <= `EXE_RES_JUMP_BRANCH;
+						wreg_o <= `WriteDisable;
+						reg1_read_o <= 1'b1;
+						reg2_read_o <= 1'b0;
+						instvalid <= `InstValid;
+						link_addr_o <= `ZeroWord;
+						branch_flag_o <= `Branch;
+						branch_target_address_o <= reg1_o;
+						next_inst_in_delayslot_o <= `InDelaySlot;
+					end
+					`EXE_JALR: begin
+						aluop_o <= `EXE_JALR_OP;
+						alusel_o <= `EXE_RES_JUMP_BRANCH;
+						wreg_o <= `WriteEnable;
+						wd_o <= inst_i[15:11];// rd
+						reg1_read_o <= 1'b1;
+						reg2_read_o <= 1'b0;
+						instvalid <= `InstValid;
+						link_addr_o <= pc_plus_8;
+						branch_flag_o <= `Branch;
+						branch_target_address_o <= reg1_o;
+						next_inst_in_delayslot_o <= `InDelaySlot;
+					end
 					`EXE_SYNC: begin //sync 指令 ?
 						aluop_o <= `EXE_NOP_OP;
 						alusel_o <= `EXE_RES_NOP;
@@ -356,6 +410,82 @@ module id(
 				imm <= {{16{inst_i[15]}}, inst_i[15:0]};
 				instvalid <= `InstValid;
 			end
+			`EXE_J: begin
+				aluop_o <= `EXE_J_OP;
+				alusel_o <= `EXE_RES_JUMP_BRANCH;
+				wreg_o <= `WriteDisable;
+				reg1_read_o <= 1'b0;
+				reg2_read_o <= 1'b0;
+				instvalid <= `InstValid;
+				link_addr_o <= `ZeroWord;
+				branch_flag_o <= `Branch;
+				branch_target_address_o <= {pc_plus_4[31:28], inst_i[25:0], 2'b00};
+				next_inst_in_delayslot_o <= `InDelaySlot;
+			end
+			`EXE_JAL: begin
+				aluop_o <= `EXE_JAL_OP;
+				alusel_o <= `EXE_RES_JUMP_BRANCH;
+				wreg_o <= `WriteEnable;
+				wd_o <= 5'b11111;
+				reg1_read_o <= 1'b0;
+				reg2_read_o <= 1'b0;
+				instvalid <= `InstValid;
+				link_addr_o <= pc_plus_8;
+				branch_flag_o <= `Branch;
+				branch_target_address_o <= {pc_plus_4[31:28], inst_i[25:0], 2'b00};
+				next_inst_in_delayslot_o <= `InDelaySlot;
+			end
+			`EXE_BEQ: begin
+				aluop_o <= `EXE_BEQ_OP;
+				alusel_o <= `EXE_RES_JUMP_BRANCH;
+				wreg_o <= `WriteDisable;
+				reg1_read_o <= 1'b1;
+				reg2_read_o <= 1'b1;
+				instvalid <= `InstValid;	
+				if(reg1_o == reg2_o) begin
+					branch_flag_o <= `Branch;
+					branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
+					next_inst_in_delayslot_o <= `InDelaySlot;		  	
+				end
+			end
+			`EXE_BGTZ: begin
+				aluop_o <= `EXE_BGTZ_OP;
+				alusel_o <= `EXE_RES_JUMP_BRANCH;
+				wreg_o <= `WriteDisable;
+				reg1_read_o <= 1'b1;
+				reg2_read_o <= 1'b0;
+				instvalid <= `InstValid;	
+				if((reg1_o[31] == 1'b0) && (reg1_o != `ZeroWord)) begin
+					branch_flag_o <= `Branch;
+					branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
+					next_inst_in_delayslot_o <= `InDelaySlot;		  	
+				end
+			end
+			`EXE_BLEZ: begin
+				aluop_o <= `EXE_BLEZ_OP;
+				alusel_o <= `EXE_RES_JUMP_BRANCH;
+				wreg_o <= `WriteDisable;
+				reg1_read_o <= 1'b1;
+				reg2_read_o <= 1'b0;
+				instvalid <= `InstValid;	
+				if((reg1_o[31] == 1'b1) || (reg1_o == `ZeroWord)) begin
+					branch_flag_o <= `Branch;
+					branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
+					next_inst_in_delayslot_o <= `InDelaySlot;		  	
+				end
+			end
+			`EXE_BNE: begin
+				aluop_o <= `EXE_BLEZ_OP;
+				alusel_o <= `EXE_RES_JUMP_BRANCH;
+				reg1_read_o <= 1'b1;
+				reg2_read_o <= 1'b1;
+				instvalid <= `InstValid;	
+				if(reg1_o != reg2_o) begin
+					branch_flag_o <= `Branch;
+					branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
+					next_inst_in_delayslot_o <= `InDelaySlot;		  	
+				end
+			end
 
 			`EXE_SPECIAL2_INST: begin
 				case (op3)// func
@@ -420,6 +550,69 @@ module id(
 				endcase //EXE_SPECIAL_INST2 case
 			end
 
+			`EXE_REGIMM_INST: begin
+				case (op4)
+				`EXE_BGEZ: begin
+					aluop_o <= `EXE_BGEZ_OP;
+					alusel_o <= `EXE_RES_JUMP_BRANCH;
+					wreg_o <= `WriteDisable;
+					reg1_read_o <= 1'b1;
+					reg2_read_o <= 1'b0;
+					instvalid <= `InstValid;	
+					if(reg1_o[31] == 1'b0) begin
+						branch_flag_o <= `Branch;
+						branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
+						next_inst_in_delayslot_o <= `InDelaySlot;		  	
+					end
+				end
+				`EXE_BGEZAL: begin
+					aluop_o <= `EXE_BGEZAL_OP;
+					alusel_o <= `EXE_RES_JUMP_BRANCH;
+					wreg_o <= `WriteEnable;
+					wd_o <= 5'b11111;
+					reg1_read_o <= 1'b1;
+					reg2_read_o <= 1'b0;
+					instvalid <= `InstValid;
+					link_addr_o <= pc_plus_8;
+					if(reg1_o[31] == 1'b0) begin
+						branch_flag_o <= `Branch;
+						branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
+						next_inst_in_delayslot_o <= `InDelaySlot;
+					end
+				end
+				`EXE_BLTZ: begin
+					wreg_o <= `WriteDisable;
+					aluop_o <= `EXE_BGEZAL_OP;
+					alusel_o <= `EXE_RES_JUMP_BRANCH;
+					reg1_read_o <= 1'b1;
+					reg2_read_o <= 1'b0;
+					instvalid <= `InstValid;	
+					if(reg1_o[31] == 1'b1) begin
+						branch_flag_o <= `Branch;
+						branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
+						next_inst_in_delayslot_o <= `InDelaySlot;		  	
+					end
+				end
+				`EXE_BLTZAL: begin
+					aluop_o <= `EXE_BGEZAL_OP;
+					alusel_o <= `EXE_RES_JUMP_BRANCH;
+					wreg_o <= `WriteEnable;
+					wd_o <= 5'b11111;
+					reg1_read_o <= 1'b1;
+					reg2_read_o <= 1'b0;
+					instvalid <= `InstValid;
+					link_addr_o <= pc_plus_8;
+					if(reg1_o[31] == 1'b1) begin
+						branch_flag_o <= `Branch;
+						branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
+						next_inst_in_delayslot_o <= `InDelaySlot;
+					end
+				end
+				default: begin
+				end
+				endcase
+			end
+
 			`EXE_PREF: begin //pref 指令 ?
 				aluop_o <= `EXE_NOP_OP;
 				alusel_o <= `EXE_RES_NOP;
@@ -466,7 +659,6 @@ module id(
 		end	//if
 	end	//always
 	
-
 	always @ (*) begin
 		if(rst == `RstEnable) begin
 			reg1_o <= `ZeroWord;
@@ -502,6 +694,14 @@ module id(
 			reg2_o <= imm;
 		end else begin
 			reg2_o <= `ZeroWord;
+		end
+	end
+
+	always @ (*) begin
+		if(rst == `RstEnable) begin
+			is_in_delayslot_o <= `NotInDelaySlot;
+		end else begin
+			is_in_delayslot_o <= is_in_delayslot_i;		
 		end
 	end
 

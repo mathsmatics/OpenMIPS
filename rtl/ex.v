@@ -37,6 +37,10 @@ module ex(
 	input wire[`DoubleRegBus]		div_result_i,
 	input wire						div_ready_i,
 
+	//是否转移、以及link address
+	input wire[`RegBus]           link_address_i,
+	input wire                    is_in_delayslot_i,
+
 	//执行的结果
 	output reg[`RegAddrBus]			wd_o,
 	output reg						wreg_o,
@@ -248,6 +252,9 @@ module ex(
 			`EXE_RES_MUL: begin // what about mulres[63:32] ?
 				wdata_o <= mulres[31:0];
 			end
+			`EXE_RES_JUMP_BRANCH: begin
+				wdata_o <= link_address_i;
+			end
 			default: begin
 				wdata_o <= `ZeroWord;
 			end
@@ -339,7 +346,7 @@ module ex(
 		else if((aluop_i == `EXE_DIV_OP) || (aluop_i == `EXE_DIVU_OP)) begin
 			whilo_o <= `WriteEnable;
 			hi_o <= div_result_i[63:32];
-			lo_o <= div_result_i[31:0];						
+			lo_o <= div_result_i[31:0];
 		end 
 		else if(aluop_i == `EXE_MTHI_OP) begin
 			whilo_o <= `WriteEnable;
