@@ -25,6 +25,9 @@ module id(
 	//如果上一条指令是转移指令，那么下一条指令在译码的时候is_in_delayslot为true
 	input wire						is_in_delayslot_i,
 
+	//处于执行阶段的指令的一些信息，用于解决load相关
+	input wire[`AluOpBus]			ex_aluop_i,
+
 	//送到regfile的信息
 	output reg						reg1_read_o,
 	output reg						reg2_read_o,
@@ -63,10 +66,24 @@ module id(
 	wire[`RegBus] pc_plus_4;
 	wire[`RegBus] imm_sll2_signedext; 
 
+	reg stallreq_for_reg1_loadrelate;
+	reg stallreq_for_reg2_loadrelate;
+	wire pre_inst_is_load;
+
 	assign pc_plus_8 = pc_i + 8;
 	assign pc_plus_4 = pc_i + 4;
 	assign imm_sll2_signedext = {{14{inst_i[15]}}, inst_i[15:0], 2'b00 };  
-	assign stallreq = `NoStop;
+
+	assign stallreq = stallreq_for_reg1_loadrelate | stallreq_for_reg2_loadrelate;
+	assign pre_inst_is_load = ( (ex_aluop_i == `EXE_LB_OP) || 
+								(ex_aluop_i == `EXE_LBU_OP)||
+								(ex_aluop_i == `EXE_LH_OP) ||
+								(ex_aluop_i == `EXE_LHU_OP)||
+								(ex_aluop_i == `EXE_LW_OP) ||
+								(ex_aluop_i == `EXE_LWR_OP)||
+								(ex_aluop_i == `EXE_LWL_OP)||
+								(ex_aluop_i == `EXE_LL_OP) ||
+								(ex_aluop_i == `EXE_SC_OP)) ? 1'b1 : 1'b0;
 
 	assign inst_o = inst_i;
 
@@ -597,6 +614,14 @@ module id(
 				reg2_read_o <= 1'b1;
 				instvalid <= `InstValid;
 			end
+			`EXE_SWR: begin
+				aluop_o <= `EXE_SWR_OP;
+		  		alusel_o <= `EXE_RES_LOAD_STORE;
+		  		wreg_o <= `WriteDisable;
+		  		reg1_read_o <= 1'b1;
+				reg2_read_o <= 1'b1;
+				instvalid <= `InstValid;
+			end
 			`EXE_LL: begin
 				aluop_o <= `EXE_LL_OP;
 				alusel_o <= `EXE_RES_LOAD_STORE;
@@ -789,8 +814,14 @@ module id(
 	end	//always
 	
 	always @ (*) begin
+		stallreq_for_reg1_loadrelate <= `NoStop;
+		reg1_o <= `ZeroWord;
 		if(rst == `RstEnable) begin
 			reg1_o <= `ZeroWord;
+		end else if((pre_inst_is_load == 1'b1)
+					&& (reg1_read_o == 1'b1)
+					&& (ex_wd_i == reg1_addr_o)) begin
+			stallreq_for_reg1_loadrelate <= `Stop;
 		end else if((reg1_read_o == 1'b1) 
 					&& (ex_wreg_i == 1'b1) 
 					&& (ex_wd_i == reg1_addr_o)) begin
@@ -809,8 +840,14 @@ module id(
 	end
 	
 	always @ (*) begin
+		stallreq_for_reg2_loadrelate <= `NoStop;
+		reg2_o <= `ZeroWord;
 		if(rst == `RstEnable) begin
 			reg2_o <= `ZeroWord;
+		end else if((pre_inst_is_load == 1'b1)
+					&& (reg2_read_o == 1'b1)
+					&& (ex_wd_i == reg2_addr_o)) begin
+			stallreq_for_reg2_loadrelate <= `Stop;
 		end else if((reg2_read_o == 1'b1) && (ex_wreg_i == 1'b1) 
 								&& (ex_wd_i == reg2_addr_o)) begin
 			reg2_o <= ex_wdata_i;

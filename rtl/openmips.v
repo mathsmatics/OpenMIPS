@@ -178,6 +178,9 @@ module openmips(
 		
 		.is_in_delayslot_i(is_in_delayslot_i),
 
+		//用于解决load相关
+		.ex_aluop_i(ex_aluop_o),
+
 		//送到regfile的信息
 		.reg1_read_o(reg1_read),
 		.reg2_read_o(reg2_read), 	  
