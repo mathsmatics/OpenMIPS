@@ -19,6 +19,11 @@ module ex_mem(
 	input wire[`RegBus]				ex_lo,
 	input wire						ex_whilo,
 
+	//为实现加载、访存指令而添加
+	input wire[`AluOpBus]			ex_aluop,
+	input wire[`RegBus]				ex_mem_addr,
+	input wire[`RegBus]				ex_reg2,
+
 	// 乘累加/减增加的输入接口
 	input wire[`DoubleRegBus]		hilo_i,
 	input wire[1:0]					cnt_i,
@@ -30,6 +35,11 @@ module ex_mem(
 	output reg[`RegBus]				mem_hi,
 	output reg[`RegBus]				mem_lo,
 	output reg						mem_whilo,
+
+	//为实现加载、访存指令而添加
+	output reg[`AluOpBus]			mem_aluop,
+	output reg[`RegBus]				mem_mem_addr,
+	output reg[`RegBus]				mem_reg2,
 
 	// 乘累加/减增加的输出接口
 	output reg[`DoubleRegBus]		hilo_o,
@@ -49,7 +59,10 @@ module ex_mem(
 			mem_lo <= `ZeroWord;
 			mem_whilo <= `WriteDisable;
 			hilo_o <= {`ZeroWord,`ZeroWord};
-			cnt_o <= 2'b0;
+			cnt_o <= 2'b00;
+			mem_aluop <= `EXE_NOP_OP;
+			mem_mem_addr <= `ZeroWord;
+			mem_reg2 <= `ZeroWord;	
 		end
 		else if(stall[3] == `Stop && stall[4] == `NoStop)begin
 			mem_wd <= `NOPRegAddr;
@@ -60,6 +73,9 @@ module ex_mem(
 			mem_whilo <= `WriteDisable;
 			hilo_o <= hilo_i;
 			cnt_o <= cnt_i;
+  			mem_aluop <= `EXE_NOP_OP;
+			mem_mem_addr <= `ZeroWord;
+			mem_reg2 <= `ZeroWord;		
 		end
 		else if(stall[3] == `NoStop)begin
 			mem_wd <= ex_wd;
@@ -69,7 +85,10 @@ module ex_mem(
 			mem_lo <= ex_lo;
 			mem_whilo <= ex_whilo;
 			hilo_o <= {`ZeroWord,`ZeroWord};
-			cnt_o <= 2'b0;
+			cnt_o <= 2'b00;
+  			mem_aluop <= ex_aluop;
+			mem_mem_addr <= ex_mem_addr;
+			mem_reg2 <= ex_reg2;	
 		end
 		else begin // why ?
 			hilo_o <= hilo_i;

@@ -38,8 +38,10 @@ module ex(
 	input wire						div_ready_i,
 
 	//是否转移、以及link address
-	input wire[`RegBus]           link_address_i,
-	input wire                    is_in_delayslot_i,
+	input wire[`RegBus]				link_address_i,
+	input wire						is_in_delayslot_i,
+
+	input wire[`RegBus]				inst_i,
 
 	//执行的结果
 	output reg[`RegAddrBus]			wd_o,
@@ -59,6 +61,11 @@ module ex(
 	output reg[`RegBus]				div_opdata2_o,
 	output reg						div_start_o,
 	output reg						signed_div_o,
+
+	//加载、存储指令相关
+	output wire[`AluOpBus]			aluop_o,
+	output wire[`RegBus]			mem_addr_o,
+	output wire[`RegBus]			reg2_o,
 
 	output reg						stallreq
 );
@@ -87,6 +94,15 @@ module ex(
 	reg[`DoubleRegBus] hilo_temp1;
 	reg stallreq_for_madd_msub;
 	reg stallreq_for_div;
+
+	//aluop_o传递到访存阶段，用于加载、存储指令
+	assign aluop_o = aluop_i;
+
+	//mem_addr传递到访存阶段，是加载、存储指令对应的存储器地址
+	assign mem_addr_o = reg1_i + {{16{inst_i[15]}},inst_i[15:0]};
+
+	//将两个操作数也传递到访存阶段，也是为记载、存储指令准备的
+	assign reg2_o = reg2_i;
 
 //**************** data select ************************************************
 
