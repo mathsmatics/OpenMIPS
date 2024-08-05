@@ -29,6 +29,11 @@ module mem(
 	input wire						wb_LLbit_we_i,
 	input wire						wb_LLbit_value_i,
 
+	//协处理器CP0的写信号
+	input wire						cp0_reg_we_i,
+	input wire[4:0]					cp0_reg_write_addr_i,
+	input wire[`RegBus]				cp0_reg_data_i,
+
 	//送到回写阶段的信息
 	output reg[`RegAddrBus]			wd_o,
 	output reg						wreg_o,
@@ -47,7 +52,12 @@ module mem(
 	
 	//送到LLbit的信息
 	output reg						LLbit_we_o,
-	output reg						LLbit_value_o
+	output reg						LLbit_value_o,
+	
+	//协处理器CP0的写信号
+	output reg						cp0_reg_we_o,
+	output reg[4:0]					cp0_reg_write_addr_o,
+	output reg[`RegBus]				cp0_reg_data_o
 );
 
 	reg mem_we;
@@ -87,7 +97,11 @@ module mem(
 			mem_data_o <= `ZeroWord;
 
 			LLbit_we_o <= 1'b0;
-			LLbit_value_o <= 1'b0;	
+			LLbit_value_o <= 1'b0;
+			
+			cp0_reg_we_o <= `WriteDisable;
+			cp0_reg_write_addr_o <= 5'b00000;
+			cp0_reg_data_o <= `ZeroWord;
 		end 
 		else begin
 			wd_o <= wd_i;
@@ -104,7 +118,11 @@ module mem(
 			mem_data_o <= `ZeroWord;
 
 			LLbit_we_o <= 1'b0;
-			LLbit_value_o <= 1'b0;	
+			LLbit_value_o <= 1'b0;
+			
+			cp0_reg_we_o <= cp0_reg_we_i;
+			cp0_reg_write_addr_o <= cp0_reg_write_addr_i;
+			cp0_reg_data_o <= cp0_reg_data_i;
 			case (aluop_i)
 			`EXE_LB_OP: begin
 				mem_ce_o <= `ChipEnable;

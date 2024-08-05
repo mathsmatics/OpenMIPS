@@ -16,8 +16,8 @@
 `define NotInDelaySlot		1'b0			// 不在延迟槽中
 `define Branch				1'b1			// 转移
 `define NotBranch			1'b0			// 不转移
-`define InterruptAssert		1'b1			
-`define InterruptNotAssert	1'b0			
+`define InterruptAssert		1'b1			//
+`define InterruptNotAssert	1'b0			//
 `define TrapAssert			1'b1			
 `define TrapNotAssert		1'b0			
 `define True_v				1'b1			// 逻辑“真”
@@ -111,7 +111,7 @@
 `define EXE_REGIMM_INST		6'b000001
 `define EXE_SPECIAL2_INST	6'b011100
 
-//AluOp
+// ----- AluOp -----
 `define EXE_AND_OP			8'b00100100
 `define EXE_OR_OP			8'b00100101
 `define EXE_XOR_OP			8'b00100110
@@ -192,9 +192,12 @@
 `define EXE_PREF_OP			8'b11110011
 `define EXE_SYNC_OP			8'b00001111
 
+`define EXE_MFC0_OP			8'b01011101
+`define EXE_MTC0_OP			8'b01100000
+
 `define EXE_NOP_OP			8'b00000000
 
-//AluSel
+// ----- AluSel -----
 `define EXE_RES_LOGIC		3'b001
 `define EXE_RES_SHIFT		3'b010
 `define EXE_RES_MOVE		3'b011
@@ -229,7 +232,6 @@
 `define NOPRegAddr			5'b00000
 
 //********************* 与除法 div 有关的宏定义 *******************
-
 `define DivFree				2'b00
 `define DivByZero			2'b01
 `define DivOn				2'b10
@@ -238,3 +240,12 @@
 `define DivResultNotReady	1'b0
 `define DivStart			1'b1
 `define DivStop				1'b0
+
+//********************* 与除法 div 有关的宏定义 *******************
+`define CP0_REG_COUNT		5'b01001		//可读写
+`define CP0_REG_COMPARE		5'b01011		//可读写
+`define CP0_REG_STATUS		5'b01100		//可读写
+`define CP0_REG_CAUSE		5'b01101		//只读
+`define CP0_REG_EPC			5'b01110		//可读写
+`define CP0_REG_PrId		5'b01111		//只读
+`define CP0_REG_CONFIG		5'b10000		//只读
